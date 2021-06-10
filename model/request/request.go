@@ -30,7 +30,7 @@ func (req *Request)CheckPermissionService() (string, error) {
 	tableName := "casbin"
 	adapter, err := casbinpgadapter.NewAdapter(db, tableName)
 
-	e, err := casbin.NewEnforcer("src/model.conf", adapter)
+	e, err := casbin.NewEnforcer("model.conf", adapter)
 	if err != nil {
 		return "", err
 	}
