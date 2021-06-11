@@ -23,12 +23,12 @@ func (req Request)checkPermissionForUser() bool {
 }
 
 func (req *Request)CheckPermissionService() (string, error) {
-	db, err := model.ConnectToPostgresAndReturnEnforcer()
+	db, err := model.ConnectToPostgres()
 	if err != nil {
-
+		return "", errors.New("cannot access to other accounts")
 	}
 	tableName := "casbin"
-	adapter, err := casbinpgadapter.NewAdapter(db, tableName)
+	adapter, _ := casbinpgadapter.NewAdapter(db, tableName)
 
 	e, err := casbin.NewEnforcer("model.conf", adapter)
 	if err != nil {
@@ -45,14 +45,16 @@ func (req *Request)CheckPermissionService() (string, error) {
 		return "", nil
 	}
 
-	if ok == true {
+	if ok{
 		// allow
 		//fmt.Printf("Allow %s %s %s %s\n", req.userId, req.role, req.path, req.method)
-		return "Allow", nil
+		msg := "Allow " + req.UserId + " access to " + req.Path + " method " + req.Method
+		return msg, nil
 	} else {
 		// deny the request, show an error
 		//fmt.Printf("Deny %s %s %s %s\n", req.userId, req.role, req.path, req.method)
-		return "Deny", nil
+		msg := "Deny " + req.UserId + " access to " + req.Path + " method " + req.Method
+		return msg, nil
 	}
 
 }

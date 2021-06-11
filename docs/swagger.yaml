@@ -38,7 +38,143 @@ paths:
           description: Bad Request
           schema:
             type: HTTPError
-      summary: manipulate date
+      summary: manipulate message from Kafka
       tags:
       - access-control
+  /general/{type}:
+    get:
+      parameters:
+      - description: type
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: HTTPError
+      summary: Show the list of objects by limit input.
+      tags:
+      - general
+    post:
+      parameters:
+      - description: type
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: model-value
+        in: body
+        name: model-value
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: HTTPError
+      summary: Create Object with Specified Type
+      tags:
+      - general
+  /general/{type}/{id}:
+    delete:
+      parameters:
+      - description: type
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: HTTPError
+      summary: Deactive object by user_id
+      tags:
+      - general
+    get:
+      parameters:
+      - description: type
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: HTTPError
+      summary: Get active object by Id
+      tags:
+      - general
+    put:
+      parameters:
+      - description: type
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: model_value
+        in: body
+        name: model_value
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: HTTPError
+      summary: Update specified object with id
+      tags:
+      - general
 swagger: "2.0"
