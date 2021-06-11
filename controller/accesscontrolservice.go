@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"access_control/model/apidetail"
 	"access_control/model/request"
 	"access_control/model/role"
 	"errors"
@@ -41,12 +42,25 @@ func CheckPermission(c echo.Context) (err error) {
 func Create(c echo.Context) (err error) {
 	modelType := c.Param("type")
 	switch modelType {
-		case "role": {
+	case "role":
+		{
 			role := role.Role{}
 			if err = c.Bind(&role); err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
 			role, err = role.Create()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			return c.NoContent(http.StatusNoContent)
+		}
+	case "api_detail":
+		{
+			apidetail := apidetail.ApiDetail{}
+			if err = c.Bind(&apidetail); err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			apidetail, err = apidetail.Create()
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
@@ -69,16 +83,25 @@ func Get(c echo.Context) (err error) {
 	modelType := c.Param("type")
 
 	switch modelType {
-	case "role": {
-		roles, err := role.Get()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	case "role":
+		{
+			roles, err := role.Get()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			return c.JSONPretty(http.StatusOK, roles, " ")
 		}
-		return c.JSONPretty(http.StatusOK, roles, " ")
-	}
+	case "api_detail":
+		{
+			apiDetails, err := apidetail.Get()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			return c.JSONPretty(http.StatusOK, apiDetails, " ")
+		}
 	default:
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("model type does not exist"))
-	
+
 	}
 }
 
@@ -96,17 +119,26 @@ func GetById(c echo.Context) (err error) {
 	id := c.Param("id")
 
 	switch modelType {
-	case "role": {
-		role, err := role.GetById(id)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
+	case "role":
+		{
+			role, err := role.GetById(id)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
 
-		return c.JSONPretty(http.StatusOK, &role, "  ")
+			return c.JSONPretty(http.StatusOK, &role, "  ")
+		}
+	case "api_detail":
+		{
+			apidetail, err := apidetail.GetById(id)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			return c.JSONPretty(http.StatusOK, &apidetail, "  ")
+		}
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("model type does not exist"))
 	}
-default:
-	return echo.NewHTTPError(http.StatusBadRequest, errors.New("model type does not exist"))
-}
 }
 
 // Update Update specified object with id
@@ -124,7 +156,8 @@ func Update(c echo.Context) (err error) {
 	id := c.Param("id")
 
 	switch modelType {
-		case "role": {
+	case "role":
+		{
 			role, err := role.GetById(id)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -133,7 +166,25 @@ func Update(c echo.Context) (err error) {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
 			role, err = role.Update()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
 			return c.JSONPretty(http.StatusOK, &role, "  ")
+		}
+	case "api_detail":
+		{
+			apiDetail, err := apidetail.GetById(id)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			if err = c.Bind(&apiDetail); err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			apiDetail, err = apiDetail.Update()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			return c.JSONPretty(http.StatusOK, &apiDetail, "  ")
 		}
 	default:
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("model type does not exist"))
@@ -154,8 +205,17 @@ func Delete(c echo.Context) (err error) {
 	id := c.Param("id")
 
 	switch modelType {
-		case "role": {
+	case "role":
+		{
 			err := role.Delete(id)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			return c.NoContent(http.StatusNoContent)
+		}
+	case "api_detail":
+		{
+			err := apidetail.Delete(id)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
