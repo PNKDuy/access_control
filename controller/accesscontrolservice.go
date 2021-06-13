@@ -2,6 +2,7 @@ package controller
 
 import (
 	"access_control/model/apidetail"
+	"access_control/model/casbin"
 	"access_control/model/request"
 	"access_control/model/role"
 	"errors"
@@ -42,13 +43,25 @@ func CheckPermission(c echo.Context) (err error) {
 func Create(c echo.Context) (err error) {
 	modelType := c.Param("type")
 	switch modelType {
+	case "casbin":
+		{
+			casbin := casbin.Casbin{}
+			if err = c.Bind(&casbin); err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}	
+			_, err = casbin.Create()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			return c.NoContent(http.StatusNoContent)
+		}
 	case "role":
 		{
 			role := role.Role{}
 			if err = c.Bind(&role); err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
-			role, err = role.Create()
+			_, err = role.Create()
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
@@ -60,7 +73,7 @@ func Create(c echo.Context) (err error) {
 			if err = c.Bind(&apidetail); err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
-			apidetail, err = apidetail.Create()
+			_, err = apidetail.Create()
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}

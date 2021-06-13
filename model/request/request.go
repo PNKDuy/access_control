@@ -25,9 +25,9 @@ func (req Request)checkPermissionForUser() bool {
 func (req *Request)CheckPermissionService() (string, error) {
 	db, err := model.ConnectToPostgres()
 	if err != nil {
-		return "", errors.New("cannot access to other accounts")
+		return "", errors.New("cannot connect to database")
 	}
-	tableName := "casbin"
+	tableName := "casbins"
 	adapter, _ := casbinpgadapter.NewAdapter(db, tableName)
 
 	e, err := casbin.NewEnforcer("model.conf", adapter)
@@ -56,6 +56,9 @@ func (req *Request)CheckPermissionService() (string, error) {
 		msg := "Deny " + req.UserId + " access to " + req.Path + " method " + req.Method
 		return msg, nil
 	}
+}
+
+func GetApiListByRole(role string) {
 
 }
 
