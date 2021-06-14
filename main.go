@@ -27,6 +27,10 @@ func main() {
 		general.PUT("/:type/:id", controller.Update)
 		general.DELETE("/:type/:id", controller.Delete)
 	}
+	casbin := server.Group("/casbin")
+	{
+		casbin.GET("/:role", controller.GetCasbinByRole)
+	}
 	server.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	server.Logger.Fatal(server.Start(":8080"))

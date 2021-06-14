@@ -41,6 +41,26 @@ paths:
       summary: manipulate message from Kafka
       tags:
       - access-control
+  /casbin/{role}:
+    get:
+      parameters:
+      - description: role
+        in: path
+        name: role
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: HTTPError
+      summary: return of api that role can access to
+      tags:
+      - casbin
   /general/{type}:
     get:
       parameters:

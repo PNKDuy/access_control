@@ -60,6 +60,37 @@ var doc = `{
                 }
             }
         },
+        "/casbin/{role}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "casbin"
+                ],
+                "summary": "return of api that role can access to",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "role",
+                        "name": "role",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/general/{type}": {
             "get": {
                 "produces": [

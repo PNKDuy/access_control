@@ -10,7 +10,7 @@ type Casbin struct {
 }
 
 const (
-	selectCasbinByRole = "select v0, v1, v2 from casbin where v0 = ? LIMIT 1000"
+	selectCasbinByRole = "select p_type, v0, v1, v2 from casbins where v0 = ? LIMIT 1000"
 )
 
 func GetByRole(role string) ([]Casbin, error) {
@@ -26,4 +26,11 @@ func (casbin Casbin)Create() (Casbin,error) {
 		return casbin, err
 	}
 	return casbin, nil
+}
+
+func Delete(role, path, method string) error {
+	if err := model.Db.Where("v0 = ? && v1 = ? && v2 = ?", role, path, method).Delete(&Casbin{}).Error; err != nil {
+		return err
+	}
+	return nil
 }

@@ -238,3 +238,21 @@ func Delete(c echo.Context) (err error) {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("model type does not exist"))
 	}
 }
+
+
+// GetCasbinByRole Get casbin list by role
+// @Summary return of api that role can access to
+// @Tags casbin
+// @Param role path string true "role"
+// @Produce json
+// @Success 200
+// @Failure 400 {HTTPError} HTTPError
+// @Router /casbin/{role} [get]
+func GetCasbinByRole(c echo.Context) (err error) {
+	role := c.Param("role")
+	casbins, err := casbin.GetByRole(role)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSONPretty(http.StatusOK, &casbins, " ")
+}
