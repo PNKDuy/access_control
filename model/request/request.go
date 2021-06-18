@@ -2,10 +2,17 @@ package request
 
 import (
 	"access_control/model"
+	"bytes"
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
+	"time"
+
 	"github.com/casbin/casbin/v2"
 	casbinpgadapter "github.com/cychiuae/casbin-pg-adapter"
-	"strings"
+	kafka "github.com/segmentio/kafka-go"
 )
 
 type Request struct {
@@ -22,7 +29,7 @@ func (req Request)checkPermissionForUser() bool {
 	return true
 }
 
-func (req *Request)CheckPermissionService() (string, error) {
+func (req *Request)CheckPermission() (string, error) {
 	db, err := model.ConnectToPostgres()
 	if err != nil {
 		return "", errors.New("cannot connect to database")
@@ -58,8 +65,66 @@ func (req *Request)CheckPermissionService() (string, error) {
 	}
 }
 
-func GetApiListByRole(role string) {
+// func GetApiListByRole(role string) {
 
+// }
+
+func ConsumeMessageAndProduceBack(ctx context.Context) {
+	conn := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:     []string{"45.32.117.131:9092"},
+		Topic:       "account-service",
+		StartOffset: kafka.LastOffset,
+		GroupID:     "account-service",
+	})
+	for {
+		// the `ReadMessage` method blocks until we receive the next event
+		msg, err := conn.ReadMessage(ctx)
+		if err != nil {
+			panic("could not read message " + err.Error())
+		}
+		// after receiving the message, log its value
+		fmt.Println("received: ", string(msg.Value))
+		request, err := convertFromMessageValueToRequestModel(msg.Value)
+		if err != nil {
+			panic(err)
+		}
+		responseMessage, err := request.CheckPermission()
+		if err != nil {
+			panic(err)
+		}
+		produceMassge(responseMessage)
+	}
 }
 
+func produceMassge(msg string) error {
+	topic := "access-control"
+	partition := 0
+	reqBodyBytes := new(bytes.Buffer)
+	json.NewEncoder(reqBodyBytes).Encode(msg)
+
+	conn , err := kafka.DialLeader(context.Background(), "tcp", "45.32.117.131:9092", topic, partition)
+	if err != nil {
+		return err
+	}
+	conn.SetWriteDeadline(time.Now().Add(10*time.Second))
+	_, err = conn.WriteMessages(
+    kafka.Message{Value: []byte(reqBodyBytes.Bytes())},
+	)
+	if err != nil {
+		return err
+	}
+	if err := conn.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func convertFromMessageValueToRequestModel(msgValue []byte) (Request, error) {
+	request := Request{}
+	err := json.Unmarshal(msgValue, &request)
+	if err != nil {
+		return request, err
+	}
+	return request, nil
+}
 

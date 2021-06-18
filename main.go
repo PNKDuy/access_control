@@ -4,6 +4,8 @@ import (
 	"access_control/controller"
 	_ "access_control/docs"
 	"access_control/model"
+	"access_control/model/request"
+	"context"
 
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -12,9 +14,12 @@ import (
 // @title Access Control Service
 // @description manipulate data from Kafka
 // @version 1.0
-// @host localhost:8080
+// @host localhost:8081
 // @BasePath /
 func main() {
+	ctx := context.Background()
+	request.ConsumeMessageAndProduceBack(ctx)
+
 	model.ConnectToPostgresWithGorm()
 	server := echo.New()
 
@@ -33,5 +38,5 @@ func main() {
 	}
 	server.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	server.Logger.Fatal(server.Start(":8080"))
+	server.Logger.Fatal(server.Start(":8081"))
 }

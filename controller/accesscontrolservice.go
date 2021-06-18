@@ -24,7 +24,7 @@ func CheckPermission(c echo.Context) (err error) {
 	if err = c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	msg, err := req.CheckPermissionService()
+	msg, err := req.CheckPermission()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
