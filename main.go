@@ -17,8 +17,10 @@ import (
 // @host localhost:8081
 // @BasePath /
 func main() {
+	go func(){
 	ctx := context.Background()
 	request.ConsumeMessageAndProduceBack(ctx)
+	}()
 
 	model.ConnectToPostgresWithGorm()
 	server := echo.New()
