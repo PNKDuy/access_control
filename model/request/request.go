@@ -43,7 +43,7 @@ func (req *Request)CheckPermission() (string, error) {
 	}
 	if req.Role == "user" {
 		if !req.checkPermissionForUser() {
-			return "", errors.New("cannot access to other accounts")
+			return "Deny", nil
 		}
 	}
 	ok, err := e.Enforce(req.Role, req.Path, req.Method)
