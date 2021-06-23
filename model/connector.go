@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	DB_DSN = "user=postgres password=86s25876 dbname=access_control sslmode=disable"
+	DB_DSN = "user=postgres password=Adda@12354 dbname=access_control sslmode=disable"
 )
 
 var Db *gorm.DB
 
 func ConnectToPostgres() (*sql.DB, error){
-	connectionString := "postgresql://postgres:86s25876@localhost:5432/access_control?sslmode=disable"
+	connectionString := "postgresql://postgres:Adda@12354@localhost:5432/access_control?sslmode=disable"
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		return nil, err
