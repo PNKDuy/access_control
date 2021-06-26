@@ -38,7 +38,9 @@ func GetById(id string) (Role, error) {
 }
 
 func (role Role)Create()(Role, error) {
-	role.Id = uuid.New()
+	if role.Id == uuid.Nil {
+		role.Id = uuid.New()
+	}
 	role.UpdatedAt = time.Now()
 	role.CreatedAt = time.Now()
 	role.IsDeleted = false

@@ -21,11 +21,11 @@ func GetByRole(role string) ([]Casbin, error) {
 	return casbins, nil
 }
 
-func (casbin Casbin)Create() (Casbin,error) {
+func (casbin Casbin)Create() error {
 	if err := model.Db.Create(&casbin).Error; err != nil {
-		return casbin, err
+		return err
 	}
-	return casbin, nil
+	return nil
 }
 
 func Delete(role, path, method string) error {

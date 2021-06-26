@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -65,36 +64,7 @@ func (req *Request)CheckPermission() (string, error) {
 	}
 }
 
-// func GetApiListByRole(role string) {
 
-// }
-
-func ConsumeMessageAndProduceBack(ctx context.Context) {
-	conn := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:     []string{"45.32.117.131:9092"},
-		Topic:       "account-service",
-		StartOffset: kafka.LastOffset,
-		GroupID:     "account-service",
-	})
-	for {
-		// the `ReadMessage` method blocks until we receive the next event
-		msg, err := conn.ReadMessage(ctx)
-		if err != nil {
-			panic("could not read message " + err.Error())
-		}
-		// after receiving the message, log its value
-		fmt.Println("received: ", string(msg.Value))
-		request, err := convertFromMessageValueToRequestModel(msg.Value)
-		if err != nil {
-			panic(err)
-		}
-		responseMessage, err := request.CheckPermission()
-		if err != nil {
-			panic(err)
-		}
-		produceMassge(responseMessage)
-	}
-}
 
 func produceMassge(msg string) error {
 	topic := "access-control"

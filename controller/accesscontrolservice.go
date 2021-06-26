@@ -3,8 +3,10 @@ package controller
 import (
 	"access_control/model/apidetail"
 	"access_control/model/casbin"
+	"access_control/model/message"
 	"access_control/model/request"
 	"access_control/model/role"
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -19,6 +21,7 @@ import (
 // @Success 200 {object} request.Request
 // @Failure 400 {HTTPError} HTTPError
 // @Router /access-control [post]
+// @Security Bearer
 func CheckPermission(c echo.Context) (err error) {
 	req := request.Request{}
 	if err = c.Bind(&req); err != nil {
@@ -40,6 +43,7 @@ func CheckPermission(c echo.Context) (err error) {
 // @Success 200
 // @Failure 400 {HTTPError} HTTPError
 // @Router /general/{type} [post]
+// @Security Bearer
 func Create(c echo.Context) (err error) {
 	modelType := c.Param("type")
 	switch modelType {
@@ -49,7 +53,7 @@ func Create(c echo.Context) (err error) {
 			if err = c.Bind(&casbin); err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}	
-			_, err = casbin.Create()
+			err = casbin.Create()
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
@@ -61,9 +65,22 @@ func Create(c echo.Context) (err error) {
 			if err = c.Bind(&role); err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
-			_, err = role.Create()
+			role, err = role.Create()
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			roleJson, err := json.Marshal(&role)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			msg := message.Message{
+				Action: "create",
+				Type: "role",
+				Value: string(roleJson),
+			}
+			err =  message.ProduceMassge(msg)
+			if err != nil {
+				return err
 			}
 			return c.NoContent(http.StatusNoContent)
 		}
@@ -92,6 +109,7 @@ func Create(c echo.Context) (err error) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {HTTPError} HTTPError
 // @Router /general/{type} [get]
+// @Security Bearer
 func Get(c echo.Context) (err error) {
 	modelType := c.Param("type")
 
@@ -127,6 +145,7 @@ func Get(c echo.Context) (err error) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {HTTPError} HTTPError
 // @Router /general/{type}/{id} [get]
+// @Security Bearer
 func GetById(c echo.Context) (err error) {
 	modelType := c.Param("type")
 	id := c.Param("id")
@@ -164,6 +183,7 @@ func GetById(c echo.Context) (err error) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {HTTPError} HTTPError
 // @Router /general/{type}/{id} [put]
+// @Security Bearer
 func Update(c echo.Context) (err error) {
 	modelType := c.Param("type")
 	id := c.Param("id")
@@ -181,6 +201,20 @@ func Update(c echo.Context) (err error) {
 			role, err = role.Update()
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+
+			roleJson, err := json.Marshal(&role)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			msg := message.Message{
+				Action: "update",
+				Type: "role",
+				Value: string(roleJson),
+			}
+			err =  message.ProduceMassge(msg)
+			if err != nil {
+				return err
 			}
 			return c.JSONPretty(http.StatusOK, &role, "  ")
 		}
@@ -213,6 +247,7 @@ func Update(c echo.Context) (err error) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {HTTPError} HTTPError
 // @Router /general/{type}/{id} [delete]
+// @Security Bearer
 func Delete(c echo.Context) (err error) {
 	modelType := c.Param("type")
 	id := c.Param("id")
@@ -223,6 +258,15 @@ func Delete(c echo.Context) (err error) {
 			err := role.Delete(id)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			msg := message.Message{
+				Action: "delete",
+				Type: "role",
+				Value: id,
+			}
+			err =  message.ProduceMassge(msg)
+			if err != nil {
+				return err
 			}
 			return c.NoContent(http.StatusNoContent)
 		}
@@ -248,6 +292,7 @@ func Delete(c echo.Context) (err error) {
 // @Success 200
 // @Failure 400 {HTTPError} HTTPError
 // @Router /casbin/{role} [get]
+// @Security Bearer
 func GetCasbinByRole(c echo.Context) (err error) {
 	role := c.Param("role")
 	casbins, err := casbin.GetByRole(role)

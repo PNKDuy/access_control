@@ -4,11 +4,10 @@ import (
 	"access_control/controller"
 	_ "access_control/docs"
 	"access_control/model"
-	"access_control/model/request"
+	"access_control/model/message"
 	"context"
-	// "fmt"
-
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -17,34 +16,34 @@ import (
 // @version 1.0
 // @host localhost:8081
 // @BasePath /
+// @securityDefinitions.apiKey Bearer
+// @in header
+// @name Authorization
 func main() {
-	kafka()
-	swagger()
-}
-
-func kafka(){
 	ctx := context.Background()
-	go request.ConsumeMessageAndProduceBack(ctx)
-}
+	go message.ConsumeMessageAndSyncDatabase(ctx)
 
-func swagger () {
+	jwtMiddleware := middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey: []byte("secret")})
+
 	model.ConnectToPostgresWithGorm()
-		server := echo.New()
+	server := echo.New()
 
-		server.POST("/access-control", controller.CheckPermission)
-		general := server.Group("/general")
-		{
-			general.POST("/:type", controller.Create)
-			general.GET("/:type", controller.Get)
-			general.GET("/:type/:id", controller.GetById)
-			general.PUT("/:type/:id", controller.Update)
-			general.DELETE("/:type/:id", controller.Delete)
-		}
-		casbin := server.Group("/casbin")
-		{
-			casbin.GET("/:role", controller.GetCasbinByRole)
-		}
-		server.GET("/swagger/*", echoSwagger.WrapHandler)
+	server.POST("/access-control", controller.CheckPermission, jwtMiddleware)
+	general := server.Group("/general")
+	{
+		general.POST("/:type", controller.Create, jwtMiddleware)
+		general.GET("/:type", controller.Get, jwtMiddleware)
+		general.GET("/:type/:id", controller.GetById, jwtMiddleware)
+		general.PUT("/:type/:id", controller.Update, jwtMiddleware)
+		general.DELETE("/:type/:id", controller.Delete, jwtMiddleware)
+	}
+	casbin := server.Group("/casbin")
+	{
+		casbin.GET("/:role", controller.GetCasbinByRole, jwtMiddleware)
+	}
+	server.GET("/swagger/*", echoSwagger.WrapHandler)
 
-		go server.Logger.Fatal(server.Start(":8081"))
+	go server.Logger.Fatal(server.Start(":8081"))
+
 }

@@ -11,7 +11,7 @@ definitions:
       user_id:
         type: string
     type: object
-host: localhost:8080
+host: localhost:8081
 info:
   contact: {}
   description: manipulate data from Kafka
@@ -38,6 +38,8 @@ paths:
           description: Bad Request
           schema:
             type: HTTPError
+      security:
+      - Bearer: []
       summary: manipulate message from Kafka
       tags:
       - access-control
@@ -58,6 +60,8 @@ paths:
           description: Bad Request
           schema:
             type: HTTPError
+      security:
+      - Bearer: []
       summary: return of api that role can access to
       tags:
       - casbin
@@ -81,6 +85,8 @@ paths:
           description: Bad Request
           schema:
             type: HTTPError
+      security:
+      - Bearer: []
       summary: Show the list of objects by limit input.
       tags:
       - general
@@ -106,6 +112,8 @@ paths:
           description: Bad Request
           schema:
             type: HTTPError
+      security:
+      - Bearer: []
       summary: Create Object with Specified Type
       tags:
       - general
@@ -134,6 +142,8 @@ paths:
           description: Bad Request
           schema:
             type: HTTPError
+      security:
+      - Bearer: []
       summary: Deactive object by user_id
       tags:
       - general
@@ -161,6 +171,8 @@ paths:
           description: Bad Request
           schema:
             type: HTTPError
+      security:
+      - Bearer: []
       summary: Get active object by Id
       tags:
       - general
@@ -194,7 +206,14 @@ paths:
           description: Bad Request
           schema:
             type: HTTPError
+      security:
+      - Bearer: []
       summary: Update specified object with id
       tags:
       - general
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
